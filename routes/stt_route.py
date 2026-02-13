@@ -6,6 +6,26 @@ from utils.model_manager import get_model_manager
 # Whisper model loaded on-demand (lazy loading)
 whisper_model = None
 
+_ffmpeg_ready = False
+
+
+def ensure_ffmpeg_available():
+    """Ensure ffmpeg is available on PATH for Whisper decoding."""
+    global _ffmpeg_ready
+    if _ffmpeg_ready:
+        return
+
+    try:
+        import imageio_ffmpeg
+        ffmpeg_path = imageio_ffmpeg.get_ffmpeg_exe()
+        ffmpeg_dir = os.path.dirname(ffmpeg_path)
+        current_path = os.environ.get('PATH', '')
+        if ffmpeg_dir and ffmpeg_dir not in current_path:
+            os.environ['PATH'] = f"{ffmpeg_dir}{os.pathsep}{current_path}"
+        _ffmpeg_ready = True
+    except Exception as exc:
+        raise RuntimeError(f"ffmpeg not available: {exc}")
+
 def get_whisper_model():
     """Get Whisper model, loading it if needed"""
     global whisper_model
@@ -73,6 +93,13 @@ def speech_to_text():
                 }), 503
             
             # Transcribe with Whisper (handles WebM format directly)
+            try:
+                ensure_ffmpeg_available()
+            except Exception as ffmpeg_error:
+                return jsonify({
+                    'error': f'ffmpeg missing: {str(ffmpeg_error)}. Please rebuild with bundled ffmpeg.'
+                }), 503
+
             result = model.transcribe(
                 temp_path, 
                 language=whisper_lang,

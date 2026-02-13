@@ -5,12 +5,15 @@ Build with: pyinstaller desktop.spec
 """
 
 import os
+from PyInstaller.utils.hooks import collect_data_files
 
 block_cipher = None
 
 extra_datas = []
 if os.path.exists('bundled_models'):
     extra_datas.append(('bundled_models', 'bundled_models'))
+
+extra_datas += collect_data_files('imageio_ffmpeg')
 
 # Collect all data files
 a = Analysis(
@@ -24,6 +27,7 @@ a = Analysis(
     hiddenimports=[
         'flask',
         'whisper',
+        'imageio_ffmpeg',
         'transformers',
         'torch',
         'scipy',

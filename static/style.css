@@ -269,6 +269,40 @@ select {
     border: 1px solid #bee5eb;
 }
 
+/* Microphone permission status */
+.permission-status {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.permission-status.info {
+    background: #eef6ff;
+    color: #2c5aa0;
+    border: 1px solid #cfe2ff;
+}
+
+.permission-status.success {
+    background: #e7f7ee;
+    color: #1a7f4b;
+    border: 1px solid #c9efd9;
+}
+
+.permission-status.warning {
+    background: #fff7e6;
+    color: #8a5a00;
+    border: 1px solid #ffe0a6;
+}
+
+.permission-status.error {
+    background: #fdecec;
+    color: #a21d1d;
+    border: 1px solid #f7caca;
+}
+
 .recording {
     animation: recordPulse 1.5s infinite;
 }

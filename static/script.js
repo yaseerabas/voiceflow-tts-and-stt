@@ -207,6 +207,7 @@ function setupSTT() {
 
 async function startRecording() {
     try {
+        updateMicStatus('Requesting microphone permission...', 'info');
         const stream = await navigator.mediaDevices.getUserMedia({ 
             audio: {
                 sampleRate: 16000,
@@ -269,8 +270,13 @@ async function startRecording() {
     } catch (error) {
         if (error.name === 'NotAllowedError') {
             showStatus(recordingStatus, 'Microphone access denied. Please allow microphone access and try again.', 'error');
+            updateMicStatus('Microphone permission denied. Please allow access in system settings.', 'error');
+        } else if (error.name === 'NotFoundError') {
+            showStatus(recordingStatus, 'No microphone found. Please connect a microphone and try again.', 'error');
+            updateMicStatus('No microphone detected.', 'error');
         } else {
             showStatus(recordingStatus, 'Error accessing microphone: ' + error.message, 'error');
+            updateMicStatus('Microphone error: ' + error.message, 'error');
         }
     }
 }
@@ -545,6 +551,7 @@ function setupUIEnhancements() {
     setupKeyboardShortcuts();
     setupTextareaAutoResize();
     setupRecordingIndicator();
+    setupMicPermissionStatus();
 }
 
 // Character counter
@@ -694,4 +701,39 @@ function stopRecordingTimer() {
         clearInterval(recordingTimer);
         recordingTimer = null;
     }
+}
+
+// Microphone permission status
+function setupMicPermissionStatus() {
+    updateMicStatus('Microphone permission: checking...', 'info');
+
+    if (navigator.permissions && navigator.permissions.query) {
+        navigator.permissions.query({ name: 'microphone' })
+            .then((status) => {
+                applyMicPermissionState(status.state);
+                status.onchange = () => applyMicPermissionState(status.state);
+            })
+            .catch(() => {
+                updateMicStatus('Microphone permission: unknown. Click Start Recording to prompt.', 'info');
+            });
+    } else {
+        updateMicStatus('Microphone permission: unknown. Click Start Recording to prompt.', 'info');
+    }
+}
+
+function applyMicPermissionState(state) {
+    if (state === 'granted') {
+        updateMicStatus('Microphone permission granted.', 'success');
+    } else if (state === 'denied') {
+        updateMicStatus('Microphone permission denied. Please allow access.', 'error');
+    } else {
+        updateMicStatus('Microphone permission needed. Click Start Recording to allow.', 'warning');
+    }
+}
+
+function updateMicStatus(message, type) {
+    const statusEl = document.getElementById('mic-permission-status');
+    if (!statusEl) return;
+    statusEl.textContent = message;
+    statusEl.className = `permission-status ${type}`;
 }

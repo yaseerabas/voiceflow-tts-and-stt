@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QSystemTrayIcon,
                             QPushButton, QLabel, QProgressBar)
 from PyQt5.QtCore import Qt, QUrl, QTimer, pyqtSignal, QObject
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 
 # Import Flask app
 from app import app as flask_app
@@ -285,6 +285,7 @@ class VoiceFlowDesktop(QMainWindow):
         
         # Setup WebView
         self.browser = QWebEngineView()
+        self.browser.setPage(VoiceFlowWebPage(self.browser))
         self.setCentralWidget(self.browser)
         
         # Setup system tray
@@ -398,6 +399,28 @@ class VoiceFlowDesktop(QMainWindow):
             event.ignore()
         else:
             event.accept()
+
+
+class VoiceFlowWebPage(QWebEnginePage):
+    """Web page that grants microphone access for STT."""
+
+    def featurePermissionRequested(self, security_origin, feature):
+        if feature in (
+            QWebEnginePage.MediaAudioCapture,
+            QWebEnginePage.MediaVideoCapture,
+            QWebEnginePage.MediaAudioVideoCapture,
+        ):
+            self.setFeaturePermission(
+                security_origin,
+                feature,
+                QWebEnginePage.PermissionGrantedByUser
+            )
+        else:
+            self.setFeaturePermission(
+                security_origin,
+                feature,
+                QWebEnginePage.PermissionDeniedByUser
+            )
 
 
 def main():
