@@ -1,9 +1,9 @@
-torch==2.8.0
-torchvision==0.23.0
-torchaudio==2.8.0
-transformers==4.57.6
+torch==2.2.2+cpu
+torchvision==0.17.2+cpu
+torchaudio==2.2.2+cpu
+transformers==5.1.0
 
-openai-whisper==20231117
+openai-whisper==20250625
 
 Flask
 pyttsx3
