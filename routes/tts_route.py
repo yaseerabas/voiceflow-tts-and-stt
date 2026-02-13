@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_from_directory, url_for
 import pyttsx3
 import os
 import torch
@@ -20,6 +20,22 @@ LANGUAGE_CODE = {
 }
 
 tts_bp = Blueprint("tts_route", __name__)
+
+
+@tts_bp.route('/audio/<path:filename>', methods=['GET'])
+def get_audio(filename):
+    audio_path = os.path.join(AUDIO_OUTPUT_DIR, filename)
+    if not os.path.isfile(audio_path):
+        return jsonify({'error': 'Audio file not found'}), 404
+    return send_from_directory(AUDIO_OUTPUT_DIR, filename)
+
+
+@tts_bp.route('/download/<path:filename>', methods=['GET'])
+def download_audio(filename):
+    audio_path = os.path.join(AUDIO_OUTPUT_DIR, filename)
+    if not os.path.isfile(audio_path):
+        return jsonify({'error': 'Audio file not found'}), 404
+    return send_from_directory(AUDIO_OUTPUT_DIR, filename, as_attachment=True, download_name=filename)
 
 @tts_bp.route('/tts', methods=['POST'])
 def text_to_speech():
@@ -82,7 +98,8 @@ def text_to_speech():
                         'voice_used': 'Kazakh MMS-TTS Model',
                         'gender_used': gender_preference,
                         'language_selected': LANGUAGE_CODE[tgt_language],
-                        'audio_url': f'/static/audio/{filename}',
+                        'audio_url': url_for('tts_route.get_audio', filename=filename),
+                        'download_url': url_for('tts_route.download_audio', filename=filename),
                         'audio_filename': filename
                     })
                 except Exception as kaz_error:
@@ -160,7 +177,8 @@ def text_to_speech():
                 'voice_used': selected_voice.name if voices else 'Default Voice',
                 'gender_used': gender_preference,
                 'language_selected': LANGUAGE_CODE[tgt_language],
-                'audio_url': f'/static/audio/{filename}',
+                'audio_url': url_for('tts_route.get_audio', filename=filename),
+                'download_url': url_for('tts_route.download_audio', filename=filename),
                 'audio_filename': filename
             }
             

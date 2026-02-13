@@ -788,6 +788,17 @@ textarea {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
+.history-audio-player {
+    margin-top: 10px;
+}
+
+.history-audio-player audio {
+    width: 100%;
+    max-width: 520px;
+    border-radius: 30px;
+    outline: none;
+}
+
 .play-history-audio-btn,
 .download-history-audio-btn {
     padding: 8px 16px;

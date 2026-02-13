@@ -122,7 +122,7 @@ async function speakText(text, srcLanguage, tgtLanguage) {
             
             // Show audio preview if audio_url is available
             if (data.audio_url) {
-                showAudioPreview(data.audio_url, data.audio_filename);
+                showAudioPreview(data.audio_url, data.audio_filename, data.download_url);
             }
             
             // Add to history
@@ -135,6 +135,7 @@ async function speakText(text, srcLanguage, tgtLanguage) {
                 gender: data.gender_used || 'any',
                 timestamp: new Date().toLocaleString(),
                 audioUrl: data.audio_url,
+                downloadUrl: data.download_url,
                 audioFilename: data.audio_filename
             });
         } else {
@@ -154,7 +155,7 @@ async function speakText(text, srcLanguage, tgtLanguage) {
 }
 
 // Show audio preview with player and download button
-function showAudioPreview(audioUrl, audioFilename) {
+function showAudioPreview(audioUrl, audioFilename, downloadUrl) {
     const audioPreviewContainer = document.getElementById('audio-preview-container');
     const audioPlayer = document.getElementById('audio-player');
     const audioSource = document.getElementById('audio-source');
@@ -175,7 +176,7 @@ function showAudioPreview(audioUrl, audioFilename) {
     
     // Setup download button
     downloadBtn.onclick = function() {
-        downloadAudio(audioUrl, audioFilename);
+        downloadAudio(downloadUrl || audioUrl, audioFilename);
     };
     
     // Setup replay button
@@ -414,11 +415,14 @@ function loadTTSHistory() {
         let audioButtons = '';
         if (item.audioUrl && item.audioFilename) {
             audioButtons = `
+                <div class="history-audio-player">
+                    <audio controls src="${item.audioUrl}"></audio>
+                </div>
                 <div class="history-audio-actions">
                     <button class="play-history-audio-btn" data-audio-url="${item.audioUrl}" data-audio-filename="${item.audioFilename}" title="Play audio">
-                        <i class="fas fa-play"></i>
+                        <i class="fas fa-play"></i> Preview
                     </button>
-                    <button class="download-history-audio-btn" data-audio-url="${item.audioUrl}" data-audio-filename="${item.audioFilename}" title="Download audio">
+                    <button class="download-history-audio-btn" data-audio-url="${item.audioUrl}" data-download-url="${item.downloadUrl || ''}" data-audio-filename="${item.audioFilename}" title="Download audio">
                         <i class="fas fa-download"></i>
                     </button>
                 </div>
@@ -477,8 +481,9 @@ function loadTTSHistory() {
     document.querySelectorAll('.download-history-audio-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const audioUrl = this.dataset.audioUrl;
+            const downloadUrl = this.dataset.downloadUrl || '';
             const audioFilename = this.dataset.audioFilename;
-            downloadAudio(audioUrl, audioFilename);
+            downloadAudio(downloadUrl || audioUrl, audioFilename);
         });
     });
 }
