@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceFlow - AI Speech Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="fas fa-microphone-alt"></i>
+                <h1>VoiceFlow</h1>
+            </div>
+            <p class="subtitle">AI-Powered Speech Assistant | Text-to-Speech & Speech-to-Text</p>
+        </header>
+
+        <!-- Mode Selection Buttons -->
+        <div class="mode-buttons">
+            <button id="tts-mode-btn" class="mode-btn active">
+                <i class="fas fa-volume-up"></i>
+                Text to Speech
+            </button>
+            <button id="stt-mode-btn" class="mode-btn">
+                <i class="fas fa-microphone"></i>
+                Speech to Text
+            </button>
+        </div>
+
+        <div class="main-content">
+            <!-- Text to Speech Section -->
+            <div id="tts-section" class="section active">
+                <div class="section-header">
+                    <h2><i class="fas fa-volume-up"></i> Text to Speech</h2>
+                </div>
+                <div class="form-group">
+                    <div class="label-with-actions">
+                        <label for="tts-text">Enter text to speak:</label>
+                        <div class="textarea-actions">
+                            <button type="button" id="sample-text-btn" class="small-btn" title="Load sample text">
+                                <i class="fas fa-lightbulb"></i> Sample
+                            </button>
+                            <button type="button" id="clear-tts-btn" class="small-btn" title="Clear text">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="tts-text" placeholder="Type your text here... (Tip: Ctrl+Enter to speak)" rows="4" maxlength="1000"></textarea>
+                    <div class="char-counter">
+                        <span id="char-count">0</span> / 1000 characters
+                    </div>
+                </div>
+                <div class="language-row">
+                    <div class="language-group">
+                        <label for="tts-src-language">Source Language:</label>
+                        <select id="tts-src-language">
+                            <option value="english">🇺🇸 English</option>
+                            <option value="russian">🇷🇺 Russian</option>
+                            <option value="kazakh">🇰🇿 Kazakh</option>
+                        </select>
+                    </div>
+                    <div class="language-group">
+                        <label for="tts-language">Target Language:</label>
+                        <select id="tts-language">
+                            <option value="english">🇺🇸 English</option>
+                            <option value="russian">🇷🇺 Russian</option>
+                            <option value="kazakh">🇰🇿 Kazakh</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group gender-group">
+                    <label for="tts-gender">Voice Gender:</label>
+                    <select id="tts-gender">
+                        <option value="any">Any</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <button id="speak-btn" class="action-btn">
+                    <i class="fas fa-play"></i>
+                    <span class="btn-text">Speak</span>
+                    <span class="spinner" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                </button>
+                <div id="tts-status" class="status"></div>
+                
+                <!-- Audio Preview Section -->
+                <div id="audio-preview-container" class="audio-preview-container" style="display: none;">
+                    <div class="audio-preview-header">
+                        <h3><i class="fas fa-music"></i> Audio Preview</h3>
+                    </div>
+                    <div id="audio-filename" class="audio-filename"></div>
+                    <div class="audio-player-wrapper">
+                        <audio id="audio-player" controls controlsList="nodownload">
+                            <source id="audio-source" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                    <div class="audio-actions">
+                        <button id="download-audio-btn" class="action-btn download-btn">
+                            <i class="fas fa-download"></i> Download Audio
+                        </button>
+                        <button id="replay-audio-btn" class="action-btn replay-btn">
+                            <i class="fas fa-redo"></i> Replay
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Speech to Text Section -->
+            <div id="stt-section" class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-microphone"></i> Speech to Text</h2>
+                </div>
+                <div class="form-group">
+                    <label for="stt-language">Language:</label>
+                    <select id="stt-language">
+                        <option value="english">🇺🇸 English</option>
+                        <option value="russian">🇷🇺 Russian</option>
+                        <option value="kazakh">kk Kazakh</option>
+                    </select>
+                </div>
+                <div class="recording-controls">
+                    <button id="start-recording-btn" class="action-btn record-btn">
+                        <i class="fas fa-microphone"></i> Start Recording
+                    </button>
+                    <button id="stop-recording-btn" class="action-btn stop-btn" disabled>
+                        <i class="fas fa-stop"></i> Stop Recording
+                    </button>
+                </div>
+                <div id="recording-status" class="status"></div>
+                <div class="form-group">
+                    <div class="label-with-actions">
+                        <label for="stt-result">Recognized Text:</label>
+                        <button type="button" id="copy-stt-btn" class="small-btn" title="Copy to clipboard">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <textarea id="stt-result" readonly rows="4" placeholder="Your speech will appear here..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="history-section">
+            <div class="history-header">
+                <h3><i class="fas fa-history"></i> History</h3>
+                <button id="clear-history-btn" class="clear-btn">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+            </div>
+            <div class="history-tabs">
+                <button class="history-tab active" data-tab="tts-history">
+                    <i class="fas fa-volume-up"></i> TTS History
+                </button>
+                <button class="history-tab" data-tab="stt-history">
+                    <i class="fas fa-microphone"></i> STT History
+                </button>
+            </div>
+            <div id="tts-history" class="history-content active"></div>
+            <div id="stt-history" class="history-content"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
